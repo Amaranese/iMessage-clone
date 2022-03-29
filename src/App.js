@@ -1,23 +1,35 @@
-import logo from './logo.svg';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import './App.css';
+import { login, logout, selectUser } from './features/userSlice';
+import { auth } from './firebase';
+import Imessage from './Imessage'
+import Login from './Login';
 
 function App() {
+
+  const user = useSelector(selectUser)
+  const dispatch = useDispatch()
+  useEffect(() =>{
+    auth.onAuthStateChanged(authUser => {
+      if(authUser){
+        //user is logged in
+        dispatch(login({
+          uid: authUser.uid,
+          photoUrl: authUser.photoURL,
+          email: authUser.email,
+          displayName: authUser.displayName
+        }))
+      } else{
+        //user logged out
+        dispatch(logout())
+      }
+    })
+  },[dispatch])
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      {user ? <Imessage /> : <Login />}
     </div>
   );
 }
